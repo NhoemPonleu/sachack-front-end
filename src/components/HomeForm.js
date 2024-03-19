@@ -8,6 +8,8 @@ export function HomeForm() {
   const [usersPerPage] = useState(10); // Set the number of users per page to 10
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
     loadUsers();
@@ -30,7 +32,8 @@ export function HomeForm() {
   const loadUser = async () => {
     try {
       const response = await axios.get(`https://sc-mfi.onrender.com/api/v1/customers/${id}`);
-      console.log(response);
+  //  const response = await axios.get(`http://localhost:8080/api/v1/customers/${id}`);
+      setSelectedUser(response.data);
     } catch (error) {
       console.log(error);
     }
@@ -119,91 +122,117 @@ export function HomeForm() {
     return `${headers}\n${csvRows.join("\n")}`;
   };
 
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleViewDetails = (userId) => {
+    setSelectedUserId(userId);
+    loadUser();
+  };
+
   return (
     <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-      <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+      <div className="mb-4">
+        <input
+          type="text"
+          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          placeholder="Search by first name"
+          value={searchQuery}
+          onChange={handleSearchChange}
+        />
+      </div>
+      <table className="w-full text-sm text-left rtl:text-right text-right bg-white">
+        <thead>
           <tr>
-            <th scope="col" className="p-4">
-              <div className="flex items-center">
-                <input
-                  id="checkbox-all-search"
-                  type="checkbox"
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:bg-opacity-50"
-                />
-                <label htmlFor="checkbox-all-search" className="ml-2">
-                  Select All
-                </label>
-              </div>
-            </th>
-            <th scope="col" className="px-4 py-3">
-              Customer ID
-            </th>
-            <th scope="col" className="px-4 py-3">
-              First Name
-            </th>
-            <th scope="col" className="px-4 py-3">
-              Last Name
-            </th>
-            <th scope="col" className="px-4 py-3">
-              Phone Number 1
-            </th>
-            <th scope="col" className="px-4 py-3">
-              Phone Number 2
-            </th>
-            <th scope="col" className="px-4 py-3">
-              Gender
-            </th>
+            <th className="px-4 py-3 border-b-2 border-gray-200 bg-gray-100 text-gray-600">First Name</th>
+            <th className="px-4 py-3 border-b-2 border-gray-200 bg-gray-100 text-gray-600">Last Name</th>
+            <th className="px-4 py-3 border-b-2 border-gray-200 bg-gray-100 text-gray-600">Phone Number</th>
+            <th className="px-4 py-3 border-b-2 border-gray-200 bg-gray-100 text-gray-600">Phone Number1</th>
+            <th className="px-4 py-3 border-b-2 border-gray-200 bg-gray-100 text-gray-600">Actions</th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
+        <tbody>
           {currentUsers.map((user) => (
-            <tr key={user.customerId}>
-              <td className="p-4">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2"
-                />
+            <tr key={user.id}>
+              <td className="px-4 py-3 border-b border-gray-200">{user.firstName}</td>
+              <td className="px-4 py-3 border-b border-gray-200">{user.lastName}</td>
+              <td className="px-4 py-3 border-b border-gray-200">{user.phoneNumbers1}</td>
+              <td className="px-4 py-3 border-b border-gray-200">{user.phoneNumbers2}</td>
+              <td className="px-4 py-3 border-b border-gray-200">
+                {/* <button
+                  className="text-blue-500 hover:text-blue-700 underline"
+                  onClick={() => handleViewDetails(user.id)}
+                >
+                  View Details
+                </button> */}
+                                  <Link
+                    className="btn btn-primary mr-2"
+                    to={`/users/${user.id}`}
+                  >
+                    View
+                  </Link> 
               </td>
-              <td className="px-4 py-3">{user.customerId}</td>
-              <td className="px-4 py-3">{user.firstName}</td>
-              <td className="px-4 py-3">{user.lastName}</td>
-              <td className="px-4 py-3">{user.phoneNumbers1}</td>
-              <td className="px-4 py-3">{user.phoneNumbers2}</td>
-              <td className="px-4 py-3">{user.gender}</td>
             </tr>
           ))}
         </tbody>
       </table>
-      {/* Pagination */}
-      <nav
-        className="flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 sm:px-6"
-        aria-label="Pagination"
-      >
-        <div className="hidden sm:block">
-          <p className="text-sm text-gray-700 dark:text-gray-400">
-            Showing {indexOfFirstUser + 1} to {indexOfLastUser} of{" "}
-            {searchQuery ? searchResults.length : users.length} results
+      <div className="flex items-center justify-between mt-4">
+        <div>
+          <p className="text-sm text-gray-600">
+            Showing {indexOfFirstUser + 1} to {Math.min(indexOfLastUser, users.length)} of {users.length} users
           </p>
         </div>
-        <div className="flex justify-between flex-1 sm:justify-end">
-          <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-            {pageNumbers.map((pageNumber) => (
-              <button
-                key={pageNumber}
-                onClick={() => paginate(pageNumber)}
-                className={`${
-                  pageNumber === currentPage
-                    ? "bg-blue-600 text-white"
-                    : "bg-white dark:bg-gray-700 dark:text-gray-400"
-                } relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white dark:bg-gray-800 dark:text-gray-400 text-sm font-medium`}
-              >
-                {pageNumber}
-              </button>
-            ))}
+        <div>
+          <nav className="flex items-center justify-center">
+            <ul className="flex items-center">
+              {pageNumbers.map((number) => (
+                <li key={number}>
+                  <button
+                    className={`${
+                      currentPage === number ? "bg-blue-500 text-white" : "bg-white text-blue-500"
+                    } hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md mx-1`}
+                    onClick={() => paginate(number)}
+                  >
+                    {number}
+                  </button>
+                </li>
+              ))}
+            </ul>
           </nav>
         </div>
-      </nav>
+      </div>
+      <div className="mt-4">
+        <button
+          className="px-4 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200"
+          onClick={handleDownload}
+        >
+          Download CSV
+        </button>
+      </div>
+      {selectedUser && (
+        <div className="absolute top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-4 rounded-md shadow-lg">
+            <h2 className="text-lg font-bold mb-2">User Details</h2>
+            <p>
+              <span className="font-bold">First Name:</span> {selectedUser.firstName}
+            </p>
+            <p>
+              <span className="font-bold">Last Name:</span> {selectedUser.lastName}
+            </p>
+            <p>
+              <span className="font-bold">Phone Number:</span> {selectedUser.phoneNumber}
+            </p>
+            <Link
+              to="/"
+              className="text-blue-500 hover:text-blue-700 underline mt-4"
+              onClick={() => setSelectedUser(null)}
+            >
+              Back to Home
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
