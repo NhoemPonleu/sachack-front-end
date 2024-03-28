@@ -37,6 +37,9 @@ export function Navbar1() {
         <Link to="/add-customer">
           <Navbar.Link>Add Customer</Navbar.Link>
         </Link>
+        <Link to="/register">
+          <Navbar.Link>Register</Navbar.Link>
+        </Link>
         <Navbar.Link href="#">Services</Navbar.Link>
         <Navbar.Link href="#">Pricing</Navbar.Link>
         <Navbar.Link href="#">Contact</Navbar.Link>

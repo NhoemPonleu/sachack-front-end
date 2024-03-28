@@ -5,6 +5,7 @@ import { Navbar1 } from './layout/NavBar';
 import { HomeForm } from './components/HomeForm';
 import { AddCustomer } from './components/AddCustomer';
 import UserView from './components/UserView';
+import { Register } from './components/Register';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Routes>
           <Route path="/home-form" element={<HomeForm />} />
           <Route path="/add-customer" element={<AddCustomer />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/users/:id" element={<UserView />} />
           {/* Other routes */}
         </Routes>
